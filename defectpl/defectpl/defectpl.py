@@ -26,12 +26,12 @@ import os
 from defectpl.data import atom_data, symbol_map, isotope_data
 
 ## Use style file
-style_file = Path(__file__).parent / "defectpl.mplstyle"
-style.use(style_file)
-
-
-plt.rcParams["font.family"] = "Arial"
-plt.rcParams["text.usetex"] = False
+#style_file = Path(__file__).parent / "defectpl.mplstyle"
+#style.use(style_file)
+#
+#
+#plt.rcParams["font.family"] = "Arial"
+#plt.rcParams["text.usetex"] = False
 
 
 # Class for defectpl
