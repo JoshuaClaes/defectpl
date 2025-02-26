@@ -572,6 +572,39 @@ class DefectPl:
 
         return A, I
 
+
+    def calc_Abs(Gts, EZPL, resolution):
+        """
+        Calculates the absorption energy.
+
+        Parameters:
+        =================
+        Gts: list
+            G(t) function.
+        EZPL: float
+            Zero Phonon Line energy.
+        resolution: float
+            Resolution of the time-domain signal.
+
+        Returns:
+        =================
+        Abs: list
+            Absorption energy.
+        A: list
+            Fourier transform of the G(t) function.
+        """
+        A = np.fft.fft(Gts)
+        # Shifting the ZPL peak to the ZPL energy value
+        A1 = A.copy()
+        l = len(A)
+        for i in range(l):
+            A[(int(EZPL * resolution) + i) % l] = A1[i]
+
+        omega = np.array(range(len(A))) / resolution
+        Abs = np.array(A) * omega
+
+        return A, Abs
+
     # Plotting Methods
     def plot_penergy_vs_pmode(
         self, frequencies, plot=False, out_dir="./", file_name="penergy_vs_pmode.pdf"
