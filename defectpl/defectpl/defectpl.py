@@ -573,7 +573,7 @@ class DefectPl:
         return A, I
 
 
-    def calc_Abs(Gts, EZPL, resolution):
+    def calc_Abs(self, Gts, EZPL, resolution):
         """
         Calculates the absorption energy.
 
@@ -600,7 +600,7 @@ class DefectPl:
         for i in range(l):
             A[(int(EZPL * resolution) + i) % l] = A1[i]
 
-        omega = np.array(range(len(A))) / resolution
+        omega = np.array(range(l)) / resolution
         Abs = np.array(A) * omega
 
         return A, Abs
