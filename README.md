@@ -1,5 +1,5 @@
 # DefectPl
-A unified package to calculate and plot optical properties of point defects in insulators and semiconductors.
+A unified package to calculate and plot optical properties of point defects in insulators and semiconductors. In this fork an extra function is added to determine the absoprtion spectrum. This this is roughly speaking the mirrored emission spectrum.
 
 [![image](https://img.shields.io/pypi/v/defectpl.svg)](https://pypi.python.org/pypi/defectpl)
 [![Downloads](https://static.pepy.tech/badge/defectpl)](https://pepy.tech/project/defectpl)
