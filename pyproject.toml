@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "defectpl"
-version = "0.1.2"
+version = "0.1.5"
 description = "A unified package for optical properties of point defects."
 authors = ["Shibu Meher <shibumeher@iisc.ac.in>"]
 readme = "README.md"
@@ -23,14 +23,17 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 PyYAML = "^6.0.2"
 numpy = "^2.1.2"
 pymatgen = "2024.10.3"
-pathlib = "^1.0.1"
 pdoc3 = "^0.11.1"
+click = "^8.1.7"
 
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+defectpl = 'defectpl.cli:main'

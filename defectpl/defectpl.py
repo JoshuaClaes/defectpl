@@ -24,6 +24,7 @@ import plotly.graph_objects as go
 import json
 import os
 from defectpl.data import atom_data, symbol_map, isotope_data
+from defectpl.plot import Plotter
 
 ## Use style file
 #style_file = Path(__file__).parent / "defectpl.mplstyle"
@@ -52,6 +53,7 @@ class DefectPl:
         iylim=None,
         dump_data=True,
         max_freq=None,
+        fig_format="pdf",
     ):
         """
         Initialize the class with the required parameters
@@ -126,6 +128,7 @@ class DefectPl:
                     iplot_xlim=self.iplot_xlim,
                     max_freq=max_freq,
                     iylim=iylim,
+                    fig_format=fig_format,
                 )
             except Exception as e:
                 print(f"Error in plotting: {e}")
@@ -1254,6 +1257,7 @@ class DefectPl:
         )
         print("All plots are saved in the output directory.")
 
+
     def to_json(self, out_dir):
         """Save all the properties to a json file.
 
@@ -1291,6 +1295,121 @@ class DefectPl:
             json.dump(data, f)
         print("Properties are saved in a json file.")
         return data
+
+    def plot_all(
+        self,
+        out_dir,
+        iplot_xlim=None,
+        max_freq=None,
+        iylim=None,
+        fig_format="pdf",
+        **kwargs,
+    ):
+        """Plot all the properties.
+
+        Parameters:
+        =================
+        out_dir: str
+            Path to the output directory to save the plots.
+        """
+        # Plot phonon energy vs phonon mode index
+        plotter = Plotter()
+        plotter.plot_penergy_vs_pmode(
+            frequencies=self.frequencies,
+            plot=False,
+            out_dir=out_dir,
+            fig_format=fig_format,
+        )
+        # Plot IPR vs phonon energy
+        plotter.plot_ipr_vs_penergy(
+            self.frequencies,
+            self.iprs,
+            plot=False,
+            out_dir=out_dir,
+            fig_format=fig_format,
+        )
+        # Plot localization ratio vs phonon energy
+        plotter.plot_loc_rat_vs_penergy(
+            self.frequencies,
+            self.localization_ratio,
+            plot=False,
+            out_dir=out_dir,
+            fig_format=fig_format,
+        )
+
+        # Plot vibrational displacement vs phonon energy
+        plotter.plot_qk_vs_penergy(
+            self.frequencies,
+            self.qks,
+            plot=False,
+            out_dir=out_dir,
+            fig_format=fig_format,
+        )
+        # Plot partial HR factor vs phonon energy
+        plotter.plot_HR_factor_vs_penergy(
+            self.frequencies,
+            self.Sks,
+            plot=False,
+            out_dir=out_dir,
+            fig_format=fig_format,
+        )
+        # Plot S(omega) vs phonon energy
+        plotter.plot_S_omega_vs_penergy(
+            self.frequencies,
+            self.S_omega,
+            self.omega_range,
+            plot=False,
+            out_dir=out_dir,
+            max_freq=max_freq,
+            fig_format=fig_format,
+        )
+        # Plot S(omega) and Sks vs phonon energy
+        plotter.plot_S_omega_Sks_vs_penergy(
+            self.frequencies,
+            self.S_omega,
+            self.omega_range,
+            self.Sks,
+            plot=False,
+            out_dir=out_dir,
+            max_freq=max_freq,
+            fig_format=fig_format,
+        )
+        # Plot S(omega) and Sks vs phonon energy
+        plotter.plot_S_omega_Sks_Loc_rat_vs_penergy(
+            self.frequencies,
+            self.S_omega,
+            self.omega_range,
+            self.Sks,
+            self.localization_ratio,
+            plot=False,
+            out_dir=out_dir,
+            max_freq=max_freq,
+            fig_format=fig_format,
+        )
+        # Plot S(omega), Sks and IPR vs phonon energy
+        plotter.plot_S_omega_Sks_ipr_vs_penergy(
+            self.frequencies,
+            self.S_omega,
+            self.omega_range,
+            self.Sks,
+            self.iprs,
+            plot=False,
+            out_dir=out_dir,
+            max_freq=max_freq,
+            fig_format=fig_format,
+        )
+        # Plot intensity vs photon energy
+        plotter.plot_intensity_vs_penergy(
+            self.frequencies,
+            self.I,
+            self.resolution,
+            iplot_xlim,
+            plot=False,
+            out_dir=out_dir,
+            iylim=iylim,
+            fig_format=fig_format,
+        )
+        print("All plots are saved in the output directory.")
 
 
 def mass_transformed_bandyaml(phonopy_yaml, force_sets_filename, masses, out_path="./"):
@@ -1523,117 +1642,3 @@ def read_properties(filename):
         "max_energy": data["max_energy"],
     }
     return properties
-
-
-def plot_interactive_intensity(filename):
-    """
-    Plot the interactive intensity plot.
-    """
-    properties = read_properties(filename)
-    I = properties["I"]
-    resolution = properties["resolution"]
-    I_abs = I.__abs__()
-    x_values = list(range(len(I_abs)))
-    x_values = np.array(x_values) / resolution
-    fig = go.Figure()
-
-    fig.add_trace(
-        go.Scatter(x=x_values, y=I_abs, mode="lines", line=dict(color="black"))
-    )
-
-    fig.show()
-
-
-def plot_interactive_S_omega_Sks_Loc_rat_vs_penergy(filename):
-    """
-    Plot the interactive S(omega), partial HR factor and localization ratio vs phonon energy.
-    """
-    properties = read_properties(filename)
-    freq = np.array(properties["frequencies"]) * EV2mEV
-    S = properties["Sks"]
-    S_omega = properties["S_omega"]
-    loc_rat = properties["localization_ratio"]
-    max_freq = max(freq)
-    omega_set = np.linspace(
-        properties["omega_range"][0],
-        properties["omega_range"][1],
-        properties["omega_range"][2],
-    )
-    x = [i for i in omega_set if i <= max_freq]
-    fig = go.Figure()
-
-    fig.add_trace(
-        go.Scatter(
-            x=omega_set[: len(x)] * 1000,
-            y=S_omega[: len(x)],
-            mode="lines",
-            line=dict(color="black"),
-            name="S(omega)",
-        )
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=freq,
-            y=S,
-            mode="markers",
-            marker=dict(color="blue"),
-            name="Partial HR factor",
-        )
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=freq,
-            y=loc_rat,
-            mode="markers",
-            marker=dict(color="green"),
-            name="Localization Ratio",
-        )
-    )
-
-    fig.show()
-
-
-def comparepl(
-    properties_files, xlim=None, ylim=None, legends=None, out_dir=None, colors=None
-):
-    """
-    Compare the PL of different isotopic compositions.
-    """
-
-    properties = []
-    for filename in properties_files:
-        properties.append(read_properties(filename))
-    I = [prop["I"] for prop in properties]
-    if xlim is None:
-        xlim = properties[0]["omega_range"]
-    else:
-        xlim = xlim
-    resolution = properties[0]["resolution"]
-
-    if legends is None:
-        legends = [f"Composition {i+1}" for i in range(len(properties_files))]
-    # Create a matplotlib figure for each intensity
-    fig, ax = plt.subplots(figsize=(6, 4))
-    for i, intensity in enumerate(I):
-        I_abs = intensity.__abs__()
-        I_abs = I_abs / np.max(I_abs)
-        if colors:
-            ax.plot(I_abs, label=legends[i], color=colors[i])
-        else:
-            ax.plot(I_abs, label=legends[i])
-    ax.set_ylabel(r"$I(\hbar\omega)$")
-    ax.set_xlabel("Photon energy (eV)")
-    ax.set_xlim(xlim[0], xlim[1])
-    ax.set_ylim(ylim[0], ylim[1])
-    x_values, labels = plt.xticks()
-    labels = [float(x) / resolution for x in x_values]
-    ax.set_xticks(x_values)
-    ax.set_xticklabels(labels)
-    ax.set_yticks([], [])
-    ax.legend(loc=0)
-    if out_dir:
-        plt.savefig(Path(out_dir) / "compare_pl.pdf", dpi=300, bbox_inches="tight")
-    else:
-        plt.show()
